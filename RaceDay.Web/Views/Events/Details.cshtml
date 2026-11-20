@@ -1,0 +1,190 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to show an event, its
+   banner, its categories and the enter-event form or the enrolment
+   status.
+
+
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the enter-event form that posts the chosen
+   category with an anti-forgery token.
+*@
+
+@model RaceDay.Web.Models.EventDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Event.Name;
+    bool hasStarted = Model.Event.EventDate <= DateTime.Now;
+
+    // A Participant can enrol only when nothing blocks it.
+    bool canEnrol = Model.Role == "Participant"
+        && Model.MyEnrolment == null
+        && !hasStarted
+        && Model.Categories.Count > 0;
+
+    ViewData["BannerTitle"] = Model.Event.Name;
+    ViewData["BannerSub"] = Model.Event.Location + " · " + Model.Event.EventDate.ToString("dddd, dd MMM yyyy, HH:mm");
+    ViewData["BannerImage"] = Model.Event.EventType == "Cycle" ? "cycle" : Model.Event.EventType == "Walk" ? "walk" : "run";
+    ViewData["BannerUrl"] = Model.Event.BannerImageUrl;
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Events", Url.Action("Index", "Events")),
+        (Model.Event.Name, null)
+    };
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="rd-panel mb-4">
+            <p class="mb-2">
+                <span class="rd-type" data-type="@Model.Event.EventType">@Model.Event.EventType</span>
+                @if (hasStarted)
+                {
+                    <span class="badge text-bg-secondary ms-1">Enrolment closed</span>
+                }
+            </p>
+            <h2 class="h4">About this event</h2>
+            <p class="mb-0">@Model.Event.Description</p>
+        </div>
+
+        <div class="rd-panel">
+            <h2 class="h4 mb-3">Categories</h2>
+
+            @if (Model.Categories.Count == 0)
+            {
+                <div class="alert alert-info mb-0">This event has no categories yet.</div>
+            }
+            else if (canEnrol)
+            {
+                <form asp-controller="Events" asp-action="Enrol" asp-route-id="@Model.Event.EventId" method="post">
+                    <fieldset>
+                        <legend class="form-label">Choose your category</legend>
+
+                        @foreach (RaceDay.Web.Dtos.CategoryResponseDto category in Model.Categories)
+                        {
+                            <label class="rd-choice" for="category-@category.CategoryId">
+                                <input class="form-check-input mt-0" type="radio" name="categoryId" id="category-@category.CategoryId" value="@category.CategoryId" />
+                                <span>
+                                    <span class="rd-choice__name">@category.CategoryName</span>
+                                    <span class="rd-choice__rule">
+                                        @category.CategoryType &middot;
+                                        @if (category.CategoryType == "Age")
+                                        {
+                                            <text>Ages @category.MinAge to @category.MaxAge</text>
+                                        }
+                                        else
+                                        {
+                                            <text>@(category.DistanceKm?.ToString("0.##")) km</text>
+                                        }
+                                    </span>
+                                </span>
+                            </label>
+                        }
+                    </fieldset>
+
+                    <p class="text-muted small">Age categories use your age on the day of the event.</p>
+
+                    <button type="submit" class="btn btn-primary btn-lg">Enter event</button>
+                </form>
+            }
+            else
+            {
+                foreach (RaceDay.Web.Dtos.CategoryResponseDto category in Model.Categories)
+                {
+                    <div class="rd-choice rd-choice--static">
+                        <span>
+                            <span class="rd-choice__name">@category.CategoryName</span>
+                            <span class="rd-choice__rule">
+                                @category.CategoryType &middot;
+                                @if (category.CategoryType == "Age")
+                                {
+                                    <text>Ages @category.MinAge to @category.MaxAge</text>
+                                }
+                                else
+                                {
+                                    <text>@(category.DistanceKm?.ToString("0.##")) km</text>
+                                }
+                            </span>
+                        </span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="rd-panel rd-sticky">
+            <h2 class="h5 mb-3">Race details</h2>
+            <dl class="rd-facts">
+                <dt>Date and start time</dt>
+                <dd>@Model.Event.EventDate.ToString("dddd, dd MMM yyyy, HH:mm")</dd>
+
+                <dt>Location</dt>
+                <dd>@Model.Event.Location</dd>
+
+                <dt>Distance</dt>
+                <dd>@Model.Event.DistanceKm.ToString("0.##") km</dd>
+            </dl>
+
+            <hr />
+
+            @if (Model.Role == null && !hasStarted)
+            {
+                <div class="alert alert-secondary mb-0">
+                    <a asp-controller="Account" asp-action="Login">Log in</a> or
+                    <a asp-controller="Account" asp-action="Register">register</a>
+                    as a Participant to enter this event.
+                </div>
+            }
+            else if (Model.Role == "Organiser")
+            {
+                <p class="text-muted mb-0">Organisers manage events from their dashboard. Only Participants can enter events.</p>
+            }
+            else if (Model.Role == "Participant" && Model.MyEnrolment != null)
+            {
+                <div class="alert alert-info mb-0">
+                    You are enrolled in the <strong>@Model.MyEnrolment.CategoryName</strong> category.
+                    Status: <strong>@Model.MyEnrolment.Status</strong>.
+
+                    @if (Model.MyEnrolment.Status == "Cancelled")
+                    {
+                        <div class="small mt-1">RaceDay allows one enrolment per event, so a cancelled enrolment cannot be replaced.</div>
+                    }
+                </div>
+            }
+            else if (Model.Role == "Participant" && hasStarted)
+            {
+                <div class="alert alert-secondary mb-0">Enrolment for this event is closed.</div>
+            }
+            else if (canEnrol)
+            {
+                <p class="text-muted small mb-0">Choose a category on the left and press Enter event.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<a asp-controller="Events" asp-action="Index" class="btn btn-link mt-3 ps-0">&larr; Back to events</a>

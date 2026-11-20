@@ -1,0 +1,30 @@
+@*
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the result form fields shared by the record
+   and edit pages.
+*@
+
+@model RaceDay.Web.Models.ResultFormViewModel
+
+<div class="mb-3">
+    <label asp-for="FinishTime" class="form-label"></label>
+    <input asp-for="FinishTime" class="form-control" placeholder="00:45:30" autocomplete="off" />
+    <span asp-validation-for="FinishTime" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="FinishingPosition" class="form-label"></label>
+    <input asp-for="FinishingPosition" type="number" min="1" step="1" class="form-control" />
+    <span asp-validation-for="FinishingPosition" class="text-danger"></span>
+</div>
+
+<div class="form-check mb-3">
+    <input asp-for="IsPublished" class="form-check-input" />
+    <label asp-for="IsPublished" class="form-check-label"></label>
+</div>

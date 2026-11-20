@@ -1,0 +1,132 @@
+@*
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the profile form fields, validation messages
+   and the anti-forgery token.
+
+
+   TITLE: Upload files in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the multipart form used to upload a
+   profile picture.
+*@
+
+@using System.Linq
+
+@model RaceDay.Web.Models.ProfileFormViewModel
+
+@{
+    ViewData["Title"] = "My profile";
+    ViewData["BannerTitle"] = "My profile";
+    ViewData["BannerSub"] = "Keep your details and picture up to date.";
+    ViewData["BannerImage"] = "walk";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("My profile", null)
+    };
+
+    // Initials for the placeholder when there is no picture yet.
+    string initials = string.Concat(
+        (Model.DisplayName ?? "?")
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2)
+            .Select(part => char.ToUpperInvariant(part[0])));
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="rd-panel text-center">
+            @if (!string.IsNullOrWhiteSpace(Model.ProfileImageUrl))
+            {
+                <img src="@Model.ProfileImageUrl" alt="Profile picture" class="rd-avatar" />
+            }
+            else
+            {
+                <div class="rd-avatar" aria-hidden="true">@initials</div>
+            }
+
+            <h2 class="h4 mb-2">@Model.DisplayName</h2>
+            <p class="mb-2"><span class="rd-type">@Model.Role</span></p>
+            <p class="text-muted small mb-1">@Model.Email</p>
+
+            @if (Model.CreatedAt != null)
+            {
+                <p class="text-muted small mb-0">Member since @Model.CreatedAt.Value.ToString("dd MMM yyyy")</p>
+            }
+
+            <hr />
+
+            <form asp-controller="Profile" asp-action="UploadPicture" method="post" enctype="multipart/form-data" class="text-start">
+                <label for="picture" class="form-label">Profile picture</label>
+                <input id="picture" name="picture" type="file" class="form-control form-control-sm mb-2"
+                       accept="image/jpeg,image/png,image/webp" />
+                <div class="form-text mb-3">JPG, PNG or WebP, up to 2 MB.</div>
+                <button type="submit" class="btn btn-outline-primary btn-sm">Upload picture</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="rd-panel">
+            <h2 class="h4 mb-3">Personal details</h2>
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <form asp-controller="Profile" asp-action="Index" method="post" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DateOfBirth" class="form-label"></label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" />
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
+
+                <p class="text-muted small">Your email address and role cannot be changed here.</p>
+
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

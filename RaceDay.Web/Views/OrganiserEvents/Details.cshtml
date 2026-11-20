@@ -1,0 +1,68 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 19 November 2026
+
+   Usage: Referenced for the Razor syntax used to display one event's
+   details to its Organiser.
+*@
+
+@model RaceDay.Web.Dtos.EventResponseDto
+
+@{
+    ViewData["Title"] = Model.Name;
+    ViewData["BannerTitle"] = Model.Name;
+    ViewData["BannerSub"] = Model.Location + " · " + Model.EventDate.ToString("dddd, dd MMM yyyy, HH:mm");
+    ViewData["BannerImage"] = Model.EventType == "Cycle" ? "cycle" : Model.EventType == "Walk" ? "walk" : "run";
+    ViewData["BannerUrl"] = Model.BannerImageUrl;
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        (Model.Name, null)
+    };
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="rd-panel">
+            <p class="mb-2"><span class="rd-type" data-type="@Model.EventType">@Model.EventType</span></p>
+            <h2 class="h4">Description</h2>
+            <p>@Model.Description</p>
+
+            <hr />
+
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="OrganiserCategories" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-secondary">Categories</a>
+                <a asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-secondary">Enrolments</a>
+                <a asp-controller="OrganiserResults" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-secondary">Results</a>
+                <a asp-controller="OrganiserEvents" asp-action="Edit" asp-route-id="@Model.EventId" class="btn btn-primary">Edit</a>
+                <a asp-controller="OrganiserEvents" asp-action="Delete" asp-route-id="@Model.EventId" class="btn btn-outline-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="rd-panel">
+            <h2 class="h5 mb-3">Event facts</h2>
+            <dl class="rd-facts">
+                <dt>Date and start time</dt>
+                <dd>@Model.EventDate.ToString("dddd, dd MMM yyyy, HH:mm")</dd>
+
+                <dt>Location</dt>
+                <dd>@Model.Location</dd>
+
+                <dt>Distance</dt>
+                <dd>@Model.DistanceKm.ToString("0.##") km</dd>
+
+                <dt>Created</dt>
+                <dd>@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<a asp-controller="Organiser" asp-action="Index" class="btn btn-link mt-3 ps-0">&larr; Back to dashboard</a>

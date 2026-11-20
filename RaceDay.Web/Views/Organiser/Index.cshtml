@@ -1,0 +1,144 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 19 November 2026
+
+   Usage: Referenced for the Razor syntax used to show the dashboard
+   cards, flash messages and the table of the Organiser's events.
+*@
+
+@model RaceDay.Web.Dtos.OrganiserDashboardDto
+
+@{
+    ViewData["Title"] = "Organiser dashboard";
+    ViewData["BannerTitle"] = "Organiser dashboard";
+    ViewData["BannerSub"] = "Your events, enrolments and results at a glance.";
+    ViewData["BannerImage"] = "finish";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", null)
+    };
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="rd-stat">
+                <div class="rd-stat__label">Total events</div>
+                <div class="rd-stat__value">@Model.TotalEvents</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="rd-stat rd-stat--cycle">
+                <div class="rd-stat__label">Upcoming</div>
+                <div class="rd-stat__value">@Model.UpcomingEvents</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="rd-stat rd-stat--walk">
+                <div class="rd-stat__label">Past</div>
+                <div class="rd-stat__value">@Model.PastEvents</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="rd-stat rd-stat--run">
+                <div class="rd-stat__label">Total enrolments</div>
+                <div class="rd-stat__value">@Model.TotalEnrolments</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-next mb-4">
+        <span class="rd-eyebrow">Next event</span>
+        @if (Model.NextUpcomingEventDate.HasValue)
+        {
+            <strong>@Model.NextUpcomingEventDate.Value.ToString("dddd, dd MMM yyyy, HH:mm")</strong>
+        }
+        else
+        {
+            <span class="text-white-50">None scheduled</span>
+        }
+    </div>
+
+    <div class="rd-toolbar">
+        <h2 class="h3">Your events</h2>
+        <a asp-controller="OrganiserEvents" asp-action="Create" class="btn btn-primary">Create event</a>
+    </div>
+
+    @if (Model.Events.Count == 0)
+    {
+        <div class="alert alert-info">
+            You have not created any events yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Enrolments</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (RaceDay.Web.Dtos.DashboardEventDto item in Model.Events)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.Name</td>
+                            <td>@item.EventDate.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td>@item.Location</td>
+                            <td><span class="rd-type" data-type="@item.EventType">@item.EventType</span></td>
+                            <td>
+                                @if (item.IsUpcoming)
+                                {
+                                    <span class="badge text-bg-success">Upcoming</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-secondary">Past</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@item.TotalEnrolments total</div>
+                                <div class="small text-muted">
+                                    @item.PendingEnrolments pending,
+                                    @item.ConfirmedEnrolments confirmed,
+                                    @item.CompletedEnrolments completed,
+                                    @item.CancelledEnrolments cancelled
+                                </div>
+                            </td>
+                            <td>
+                                <partial name="_EventRowActions" model="item" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}

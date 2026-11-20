@@ -1,0 +1,172 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to list an event's
+   enrolments, filter them by status and show only the allowed
+   status buttons.
+*@
+
+@model RaceDay.Web.Models.EnrolmentListViewModel
+
+@{
+    ViewData["Title"] = "Enrolments - " + Model.Event.Name;
+
+    bool eventStarted = Model.Event.EventDate <= DateTime.Now;
+
+    string BadgeClass(string status) => status switch
+    {
+        "Pending" => "text-bg-warning",
+        "Confirmed" => "text-bg-primary",
+        "Completed" => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
+
+    ViewData["BannerTitle"] = "Enrolments";
+    ViewData["BannerSub"] = Model.Event.Name + " · " + Model.Event.EventDate.ToString("dd MMM yyyy, HH:mm");
+    ViewData["BannerImage"] = "finish";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        (Model.Event.Name, Url.Action("Details", "OrganiserEvents", new { id = Model.Event.EventId })),
+        ("Enrolments", null)
+    };
+}
+
+<p class="mb-3">
+    @if (eventStarted)
+    {
+        <span class="badge text-bg-secondary">Event has started</span>
+    }
+    else
+    {
+        <span class="badge text-bg-success">Upcoming</span>
+    }
+</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+        <a class="nav-link @(Model.Filter == "" ? "active" : "")" asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.Event.EventId">All (@Model.TotalCount)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.Filter == "Pending" ? "active" : "")" asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.Event.EventId" asp-route-status="Pending">Pending (@Model.PendingCount)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.Filter == "Confirmed" ? "active" : "")" asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.Event.EventId" asp-route-status="Confirmed">Confirmed (@Model.ConfirmedCount)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.Filter == "Completed" ? "active" : "")" asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.Event.EventId" asp-route-status="Completed">Completed (@Model.CompletedCount)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.Filter == "Cancelled" ? "active" : "")" asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.Event.EventId" asp-route-status="Cancelled">Cancelled (@Model.CancelledCount)</a>
+    </li>
+</ul>
+
+@if (Model.Enrolments.Count == 0)
+{
+    <div class="alert alert-info">
+        @if (Model.TotalCount == 0)
+        {
+            <text>No one has enrolled in this event yet.</text>
+        }
+        else
+        {
+            <text>No enrolments match this filter.</text>
+        }
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Category</th>
+                    <th>Enrolled</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RaceDay.Web.Dtos.EnrolmentResponseDto item in Model.Enrolments)
+                {
+                    IReadOnlyList<string> allowed =
+                        RaceDay.Web.Services.EnrolmentStatusRules
+                            .GetAllowedNextStatuses(item.Status, Model.Event.EventDate);
+
+                    <tr>
+                        <td class="fw-semibold">@item.ParticipantName</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.EnrolmentDate.ToString("dd MMM yyyy, HH:mm")</td>
+                        <td><span class="badge @BadgeClass(item.Status)">@item.Status</span></td>
+                        <td>
+                            @if (allowed.Count == 0)
+                            {
+                                <span class="text-muted small">No further actions</span>
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (string next in allowed)
+                                    {
+                                        string label = next == "Confirmed" ? "Confirm"
+                                            : next == "Completed" ? "Mark completed"
+                                            : "Cancel enrolment";
+
+                                        string buttonClass = next == "Confirmed" ? "btn-success"
+                                            : next == "Completed" ? "btn-primary"
+                                            : "btn-outline-danger";
+
+                                        string confirmText = next == "Cancelled"
+                                            ? "Cancel this enrolment? This cannot be undone."
+                                            : "";
+
+                                        <form asp-controller="OrganiserEnrolments" asp-action="UpdateStatus" asp-route-eventId="@Model.Event.EventId" asp-route-id="@item.EnrolmentId" method="post" data-confirm="@confirmText">
+                                            <input type="hidden" name="newStatus" value="@next" />
+                                            <input type="hidden" name="filter" value="@Model.Filter" />
+                                            <button type="submit" class="btn btn-sm @buttonClass">@label</button>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="Organiser" asp-action="Index" class="btn btn-link mt-3 ps-0">&larr; Back to dashboard</a>
+
+@section Scripts {
+    <script>
+        // Asks for confirmation before a form that has a data-confirm
+        // message is submitted. The server still enforces the rules.
+        document.querySelectorAll("form[data-confirm]").forEach(function (form) {
+            form.addEventListener("submit", function (e) {
+                var message = form.getAttribute("data-confirm");
+
+                if (message && !window.confirm(message)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

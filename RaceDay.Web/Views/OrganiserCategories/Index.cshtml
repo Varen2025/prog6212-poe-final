@@ -1,0 +1,90 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to list an event's
+   categories with flash messages and action buttons.
+*@
+
+@model RaceDay.Web.Models.CategoryListViewModel
+
+@{
+    ViewData["Title"] = "Categories - " + Model.Event.Name;
+    ViewData["BannerTitle"] = "Categories";
+    ViewData["BannerSub"] = Model.Event.Name + " · " + Model.Event.EventDate.ToString("dd MMM yyyy, HH:mm");
+    ViewData["BannerImage"] = "run";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        (Model.Event.Name, Url.Action("Details", "OrganiserEvents", new { id = Model.Event.EventId })),
+        ("Categories", null)
+    };
+}
+
+<div class="rd-toolbar">
+    <h2 class="h3">Event categories</h2>
+    <a asp-controller="OrganiserCategories" asp-action="Create" asp-route-eventId="@Model.Event.EventId" class="btn btn-primary">Add category</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (Model.Categories.Count == 0)
+{
+    <div class="alert alert-info">
+        This event has no categories yet. Participants choose a category
+        when they enrol, so add at least one.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Rule</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RaceDay.Web.Dtos.CategoryResponseDto item in Model.Categories)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.CategoryName</td>
+                        <td><span class="badge text-bg-info">@item.CategoryType</span></td>
+                        <td>
+                            @if (item.CategoryType == "Age")
+                            {
+                                <span>Ages @item.MinAge to @item.MaxAge</span>
+                            }
+                            else
+                            {
+                                <span>@(item.DistanceKm?.ToString("0.##")) km</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">
+                            <a asp-controller="OrganiserCategories" asp-action="Edit" asp-route-eventId="@Model.Event.EventId" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a asp-controller="OrganiserCategories" asp-action="Delete" asp-route-eventId="@Model.Event.EventId" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="Organiser" asp-action="Index" class="btn btn-link mt-3 ps-0">&larr; Back to dashboard</a>

@@ -1,0 +1,66 @@
+@*
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 17 November 2026
+
+   Usage: Referenced for building the login form and for showing
+   TempData messages such as the registration success message.
+*@
+
+@model RaceDay.Web.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="rd-auth">
+            <div class="rd-auth__media">
+                <h2>Welcome back</h2>
+                <p>Log in to see your races, check your results or manage your events.</p>
+            </div>
+
+            <div class="rd-auth__form">
+                <p class="rd-eyebrow">RaceDay account</p>
+                <h1 class="h2 mb-4">Log in</h1>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-warning">@TempData["ErrorMessage"]</div>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <form asp-action="Login" method="post" novalidate>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg">Log in</button>
+                    <a asp-action="Register" class="btn btn-link">Create an account</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

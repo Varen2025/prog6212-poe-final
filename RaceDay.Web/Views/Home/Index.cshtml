@@ -1,0 +1,180 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to show the home page
+   with buttons that depend on the visitor's role.
+
+
+   TITLE: Carousel - Bootstrap v5.3
+   AUTHOR: Bootstrap contributors
+   DATE: n.d.
+   AVAILABLE:
+   https://getbootstrap.com/docs/5.3/components/carousel/
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the banner carousel with indicators, controls
+   and the fade transition.
+*@
+
+@model RaceDay.Web.Models.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+@section Hero {
+    <div id="rdHero" class="carousel slide carousel-fade rd-hero" data-bs-ride="carousel" data-bs-interval="6500" aria-label="Featured event types">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#rdHero" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1: Run"></button>
+            <button type="button" data-bs-target="#rdHero" data-bs-slide-to="1" aria-label="Slide 2: Cycle"></button>
+            <button type="button" data-bs-target="#rdHero" data-bs-slide-to="2" aria-label="Slide 3: Walk"></button>
+        </div>
+
+        <div class="carousel-inner">
+            <div class="carousel-item active rd-slide rd-slide--run" role="img" aria-label="Runners on a city road during a marathon">
+                <div class="rd-slide__inner">
+                    <div class="container">
+                        <div class="rd-slide__content">
+                            <span class="rd-kicker">Run</span>
+                            <h1 class="rd-slide__title">Find your next start line</h1>
+                            <p class="rd-slide__lead">Find a run, walk or cycle event, enrol in a category and follow your results.</p>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <a asp-controller="Events" asp-action="Index" class="btn btn-primary btn-lg">Browse events</a>
+
+                                @if (Model.Role == null)
+                                {
+                                    <a asp-controller="Account" asp-action="Register" class="btn btn-light-outline btn-lg">Register</a>
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-light-outline btn-lg">Log in</a>
+                                }
+                                else if (Model.Role == "Organiser")
+                                {
+                                    <a asp-controller="Organiser" asp-action="Index" class="btn btn-light-outline btn-lg">Organiser dashboard</a>
+                                }
+                                else if (Model.Role == "Participant")
+                                {
+                                    <a asp-controller="Participant" asp-action="Index" class="btn btn-light-outline btn-lg">My races</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item rd-slide rd-slide--cycle" role="img" aria-label="A group of cyclists riding on a road">
+                <div class="rd-slide__inner">
+                    <div class="container">
+                        <div class="rd-slide__content">
+                            <span class="rd-kicker">Cycle</span>
+                            <h2 class="rd-slide__title">Ride with the bunch</h2>
+                            <p class="rd-slide__lead">From fun rides to long road routes, pick a distance that suits your legs.</p>
+                            <a asp-controller="Events" asp-action="Index" asp-route-eventType="Cycle" class="btn btn-primary btn-lg">See cycle events</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item rd-slide rd-slide--walk" role="img" aria-label="Friends walking together in a park">
+                <div class="rd-slide__inner">
+                    <div class="container">
+                        <div class="rd-slide__content">
+                            <span class="rd-kicker">Walk</span>
+                            <h2 class="rd-slide__title">Walk it your way</h2>
+                            <p class="rd-slide__lead">Community walks for families, friends and first-timers. No pressure, just fresh air.</p>
+                            <a asp-controller="Events" asp-action="Index" asp-route-eventType="Walk" class="btn btn-primary btn-lg">See walking events</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#rdHero" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#rdHero" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+}
+
+<section class="rd-section" aria-labelledby="coming-up">
+    <div class="rd-section-head">
+        <div>
+            <p class="rd-eyebrow">On the calendar</p>
+            <h2 id="coming-up" class="rd-section-title">Coming up</h2>
+        </div>
+        <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary">See all upcoming events</a>
+    </div>
+
+    @if (Model.LoadError != null)
+    {
+        <div class="alert alert-danger">@Model.LoadError</div>
+    }
+    else if (Model.UpcomingEvents.Count == 0)
+    {
+        <div class="alert alert-info">There are no upcoming events right now. Please check back soon.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (RaceDay.Web.Dtos.EventResponseDto item in Model.UpcomingEvents)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <partial name="_EventCard" model="item" />
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<section class="rd-section" aria-labelledby="how-it-works">
+    <div class="rd-split">
+        <div class="rd-split__media rd-split__media--finish" role="img" aria-label="Runners and supporters at a finish line"></div>
+        <div class="rd-split__body">
+            <p class="rd-eyebrow">For participants</p>
+            <h2 id="how-it-works" class="rd-section-title">From sign-up to finish line</h2>
+            <ol class="rd-steps">
+                <li>
+                    <strong>Find an event</strong>
+                    Filter by run, walk or cycle, by place or by date.
+                </li>
+                <li>
+                    <strong>Pick your category</strong>
+                    Choose the age or distance category that fits you and enter.
+                </li>
+                <li>
+                    <strong>Check your result</strong>
+                    Once the organiser publishes results, your time and position appear under My Results.
+                </li>
+            </ol>
+            <a asp-controller="Events" asp-action="Index" class="btn btn-primary mt-2">Browse events</a>
+        </div>
+    </div>
+</section>
+
+@if (Model.Role == null || Model.Role == "Organiser")
+{
+    <section class="rd-section" aria-labelledby="organise">
+        <div class="rd-cta">
+            <p class="rd-eyebrow text-white-50">For organisers</p>
+            <h2 id="organise">Putting on a race?</h2>
+            <p>Create your event, set up categories, manage enrolments and publish results from one dashboard.</p>
+
+            @if (Model.Role == null)
+            {
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Register as an organiser</a>
+            }
+            else
+            {
+                <a asp-controller="Organiser" asp-action="Index" class="btn btn-primary btn-lg">Open your dashboard</a>
+            }
+        </div>
+    </section>
+}

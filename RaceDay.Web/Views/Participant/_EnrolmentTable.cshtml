@@ -1,0 +1,49 @@
+@*
+   TITLE: Partial views in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/partial
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for sharing one enrolment table between the
+   upcoming and past sections of the My Races page.
+*@
+
+@model IReadOnlyList<RaceDay.Web.Dtos.EnrolmentResponseDto>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Enrolled on</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (RaceDay.Web.Dtos.EnrolmentResponseDto enrolment in Model)
+            {
+                string badge = enrolment.Status switch
+                {
+                    "Confirmed" => "text-bg-success",
+                    "Pending" => "text-bg-warning",
+                    "Completed" => "text-bg-primary",
+                    _ => "text-bg-secondary"
+                };
+
+                <tr>
+                    <td class="fw-semibold">
+                        <a asp-controller="Events" asp-action="Details" asp-route-id="@enrolment.EventId">@enrolment.EventName</a>
+                    </td>
+                    <td>@enrolment.EventDate.ToString("dd MMM yyyy, HH:mm")</td>
+                    <td>@enrolment.CategoryName</td>
+                    <td><span class="badge @badge">@enrolment.Status</span></td>
+                    <td>@enrolment.EnrolmentDate.ToString("dd MMM yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

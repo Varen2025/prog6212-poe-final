@@ -1,0 +1,154 @@
+@*
+   TITLE: Layout in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/layout
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the shared page layout that wraps every
+   RaceDay page with the navigation bar, page banner, content area
+   and footer.
+
+
+   TITLE: Pass data to views in ASP.NET Core MVC (ViewData)
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/overview
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for letting each page set its banner title,
+   subtitle, picture and breadcrumbs through ViewData.
+*@
+@{
+    // Each view may set these ViewData values to get a page banner.
+    string? bannerTitle = ViewData["BannerTitle"] as string;
+    string? bannerSub = ViewData["BannerSub"] as string;
+    string bannerKey = ViewData["BannerImage"] as string ?? "run";
+    string? bannerUrl = ViewData["BannerUrl"] as string;
+    List<(string Text, string? Url)>? crumbs = ViewData["Crumbs"] as List<(string Text, string? Url)>;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111418" />
+    <title>@ViewData["Title"] - RaceDay</title>
+    <link rel="icon" type="image/png" href="~/images/raceday-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <a class="visually-hidden-focusable btn btn-primary position-absolute m-2" style="z-index:2000" href="#main">Skip to content</a>
+
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-md navbar-light rd-nav" aria-label="Main navigation">
+            <div class="container-fluid px-md-4">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/raceday-logo.png" alt="RaceDay home" class="rd-logo" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-md-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <partial name="_RoleNav" />
+                    </ul>
+                    <partial name="_AuthNav" />
+                </div>
+            </div>
+        </nav>
+        <div class="rd-checker" aria-hidden="true"></div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(bannerTitle))
+    {
+        <section class="rd-banner rd-banner--@bannerKey" style="@(string.IsNullOrWhiteSpace(bannerUrl) ? null : "--rd-banner-img:url('" + bannerUrl + "')")">
+            <div class="container">
+                @if (crumbs != null && crumbs.Count > 0)
+                {
+                    <nav aria-label="Breadcrumb">
+                        <ol class="rd-crumbs">
+                            @for (int i = 0; i < crumbs.Count; i++)
+                            {
+                                if (i == crumbs.Count - 1 || string.IsNullOrEmpty(crumbs[i].Url))
+                                {
+                                    <li aria-current="page">@crumbs[i].Text</li>
+                                }
+                                else
+                                {
+                                    <li><a href="@crumbs[i].Url">@crumbs[i].Text</a></li>
+                                }
+                            }
+                        </ol>
+                    </nav>
+                }
+                <h1 class="rd-banner__title">@bannerTitle</h1>
+                @if (!string.IsNullOrWhiteSpace(bannerSub))
+                {
+                    <p class="rd-banner__sub">@bannerSub</p>
+                }
+            </div>
+        </section>
+    }
+
+    @await RenderSectionAsync("Hero", required: false)
+
+    <div class="container flex-grow-1 rd-page">
+        <main id="main" role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="rd-footer">
+        <div class="rd-checker" aria-hidden="true"></div>
+        <div class="container rd-footer__main">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="rd-footer__brand">
+                        <strong>RaceDay</strong>
+                        Find a run, walk or cycle event, enter in a category and follow your results. Built for participants and the organisers who put the races on.
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3 offset-lg-1">
+                    <h2>Explore</h2>
+                    <ul>
+                        <li><a asp-area="" asp-controller="Events" asp-action="Index">All events</a></li>
+                        <li><a asp-area="" asp-controller="Account" asp-action="Register">Create an account</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <h2>Event types</h2>
+                    <ul>
+                        <li><a asp-area="" asp-controller="Events" asp-action="Index" asp-route-eventType="Run">Run</a></li>
+                        <li><a asp-area="" asp-controller="Events" asp-action="Index" asp-route-eventType="Walk">Walk</a></li>
+                        <li><a asp-area="" asp-controller="Events" asp-action="Index" asp-route-eventType="Cycle">Cycle</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="rd-footer__base">
+            <div class="container d-flex flex-wrap justify-content-between gap-2">
+                <span>&copy; 2026 RaceDay &middot; Run, walk and cycle events across South Africa</span>
+                <span>Photos from Unsplash</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

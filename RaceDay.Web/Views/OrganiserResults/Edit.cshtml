@@ -1,0 +1,50 @@
+@*
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the edit result form and its validation.
+*@
+
+@model RaceDay.Web.Models.ResultFormViewModel
+
+@{
+    ViewData["Title"] = "Edit result";
+    ViewData["BannerTitle"] = "Edit result";
+    ViewData["BannerSub"] = Model.ParticipantName + " · " + Model.CategoryName + " · " + Model.EventName;
+    ViewData["BannerImage"] = "finish";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        ("Results", Url.Action("Index", "OrganiserResults", new { eventId = Model.EventId })),
+        ("Edit result", null)
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="rd-panel">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-warning">@TempData["ErrorMessage"]</div>
+            }
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <form asp-controller="OrganiserResults" asp-action="Edit" asp-route-eventId="@Model.EventId" asp-route-id="@Model.ResultId" method="post" novalidate>
+                <partial name="_ResultFormFields" model="Model" />
+
+                <button type="submit" class="btn btn-primary btn-lg">Save changes</button>
+                <a asp-controller="OrganiserResults" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

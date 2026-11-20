@@ -1,0 +1,74 @@
+# ============================================================
+# RACEDAY - PROG6212 POE PART 1
+# GITHUB ACTIONS DOCUMENTATION CHECK
+#
+# Student Name: Varen Venketraju
+# Student Number: ST10481447
+#
+# Purpose:
+# This workflow checks that the required /docs folder exists
+# in the RaceDay GitHub repository.
+#
+# ============================================================
+# CODE ATTRIBUTION
+#
+# Usage:
+# GitHub documentation was consulted for guidance on the
+# structure and syntax of a GitHub Actions workflow and on
+# checking out repository files onto a GitHub-hosted runner.
+#
+# Author:
+# GitHub
+#
+# Source:
+# GitHub Docs and actions/checkout
+#
+# Title:
+# Workflow syntax for GitHub Actions
+#
+# Link:
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+#
+# Additional Source:
+# https://github.com/actions/checkout
+#
+# Date Accessed:
+# 19 September 2026
+#
+# ============================================================
+
+
+# Give the workflow a clear name in the Actions tab.
+name: Part 1 Docs Validation
+
+
+# Run the workflow whenever changes are pushed to the repository.
+on:
+  push:
+
+
+# Define the validation work that GitHub must perform.
+jobs:
+
+  # This job checks whether the Part 1 docs folder exists.
+  check-docs-folder:
+
+    # Run the job on a GitHub-hosted Ubuntu environment.
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Download the repository files onto the GitHub runner.
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # Check whether the required /docs folder exists.
+      - name: Check docs folder exists
+        run: |
+          if [ -d "docs" ]; then
+            echo "SUCCESS: The /docs folder exists."
+            echo "RaceDay Part 1 documentation folder was found."
+          else
+            echo "ERROR: The /docs folder does not exist."
+            exit 1
+          fi

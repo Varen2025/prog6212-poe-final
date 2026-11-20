@@ -1,0 +1,46 @@
+﻿@*
+   TITLE: Partial views in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/partial
+   DATE ACCESSED: 17 November 2026
+
+   Usage: Referenced for creating the navigation partial that shows
+   login links or the logged-in user's name, role and logout button.
+*@
+
+@using Microsoft.AspNetCore.Http
+@using RaceDay.Web.Services
+
+@{
+    int? userId = Context.Session.GetInt32(SessionKeys.UserId);
+    string? firstName = Context.Session.GetString(SessionKeys.FirstName);
+    string? role = Context.Session.GetString(SessionKeys.Role);
+}
+
+<ul class="navbar-nav align-items-lg-center">
+    @if (userId != null)
+    {
+        <li class="nav-item">
+            <span class="navbar-text me-3">
+                Hello, @firstName
+                <span class="badge text-bg-secondary">@role</span>
+            </span>
+        </li>
+        <li class="nav-item">
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Log out</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Log in</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+        </li>
+    }
+</ul>

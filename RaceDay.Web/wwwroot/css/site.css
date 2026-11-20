@@ -1,0 +1,1230 @@
+/*
+   TITLE: Bootstrap in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/client-side/bootstrap
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for restyling the default Bootstrap components
+   (navbar, buttons, cards, tables and forms) into the RaceDay
+   sporting theme using Bootstrap's CSS variables.
+
+
+   TITLE: Carousel - Bootstrap v5.3
+   AUTHOR: Bootstrap contributors
+   DATE: n.d.
+   AVAILABLE:
+   https://getbootstrap.com/docs/5.3/components/carousel/
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the home page banner carousel markup and the
+   fade transition class.
+
+
+   TITLE: Unsplash photographs (marathon, cycling and walking events)
+   AUTHOR: Photographers credited on each Unsplash photo page
+   DATE: n.d.
+   AVAILABLE:
+   https://unsplash.com/license
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Free-to-use stock photographs referenced by the --img-*
+   variables in SECTION 1 for banners, the carousel and event cards.
+
+
+   TITLE: Barlow and Barlow Condensed font families
+   AUTHOR: Jeremy Tribby
+   DATE: n.d.
+   AVAILABLE:
+   https://fonts.google.com/specimen/Barlow+Condensed
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the sporting display font used by headings.
+*/
+
+/* ============================================================
+   SECTION 1: DESIGN TOKENS (BRAND COLOURS, FONTS, IMAGES)
+   Change a colour or a photo here and the whole site follows.
+   ============================================================ */
+
+:root {
+    /* Brand, taken from the RaceDay logo and the Run/Walk/Cycle bar. */
+    --rd-red: #d71920;
+    --rd-red-dark: #a8111a;
+    --rd-black: #111418;
+    --rd-ink: #1d2733;
+    --rd-muted: #5b6672;
+    --rd-paper: #f4f3ef;
+    --rd-card: #ffffff;
+    --rd-line: #dedbd3;
+    --rd-run: #2f75b5;
+    --rd-walk: #17365d;
+    --rd-cycle: #3f8a24;
+
+    --rd-display: "Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+    --rd-body: "Barlow", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+
+    --rd-radius: 0.6rem;
+    --rd-shadow: 0 1px 2px rgba(17, 20, 24, 0.06), 0 6px 18px rgba(17, 20, 24, 0.06);
+    --rd-shadow-lift: 0 2px 4px rgba(17, 20, 24, 0.08), 0 14px 30px rgba(17, 20, 24, 0.12);
+
+    /* Photographs. Swap these URLs for files in wwwroot/images if you
+       prefer to host the pictures yourself, e.g. url("/images/run-1.jpg"). */
+    --img-run: url("https://images.unsplash.com/photo-1760315972424-1637530daead?auto=format&fit=crop&w=1920&q=70");
+    --img-run-2: url("https://images.unsplash.com/photo-1745790289741-12a211a8325d?auto=format&fit=crop&w=1920&q=70");
+    --img-cycle: url("https://images.unsplash.com/photo-1533561052604-c3beb6d55b8d?auto=format&fit=crop&w=1920&q=70");
+    --img-cycle-2: url("https://images.unsplash.com/photo-1510005294384-c03e247f0542?auto=format&fit=crop&w=1920&q=70");
+    --img-walk: url("https://images.unsplash.com/photo-1758613170887-3ac8fd2aca98?auto=format&fit=crop&w=1920&q=70");
+    --img-walk-2: url("https://images.unsplash.com/photo-1761055922823-1a5ff0dc2541?auto=format&fit=crop&w=1920&q=70");
+    --img-finish: url("https://images.unsplash.com/photo-1774557937394-1caa2ab07db6?auto=format&fit=crop&w=1920&q=70");
+
+    /* Bootstrap "primary" becomes RaceDay red. */
+    --bs-primary: #d71920;
+    --bs-primary-rgb: 215, 25, 32;
+    --bs-link-color: #c1121f;
+    --bs-link-color-rgb: 193, 18, 31;
+    --bs-link-hover-color: #8f0d17;
+    --bs-link-hover-color-rgb: 143, 13, 23;
+    --bs-body-font-family: var(--rd-body);
+    --bs-body-color: var(--rd-ink);
+    --bs-body-bg: var(--rd-paper);
+}
+
+
+/* ============================================================
+   SECTION 2: PAGE BASICS
+   ============================================================ */
+
+html {
+    font-size: 15px;
+    scroll-behavior: smooth;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    background: var(--rd-paper);
+    color: var(--rd-ink);
+    font-family: var(--rd-body);
+    line-height: 1.55;
+}
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+    font-family: var(--rd-display);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+}
+
+h1, .h1 { font-size: clamp(2.2rem, 4vw, 3.2rem); }
+h2, .h2 { font-size: clamp(1.7rem, 2.6vw, 2.2rem); }
+h3, .h3 { font-size: 1.5rem; }
+.h4, h4 { font-size: 1.3rem; }
+.h5, h5 { font-size: 1.15rem; }
+
+a {
+    text-underline-offset: 0.18em;
+}
+
+:focus-visible {
+    outline: 3px solid var(--rd-red);
+    outline-offset: 2px;
+}
+
+.rd-page {
+    padding-top: 2.25rem;
+    padding-bottom: 3rem;
+}
+
+img {
+    max-width: 100%;
+}
+
+
+/* ============================================================
+   SECTION 3: HEADER, NAVIGATION AND CHEQUERED STRIP
+   ============================================================ */
+
+.rd-nav {
+    background: #fff;
+    padding: 0.35rem 0;
+    box-shadow: 0 1px 0 var(--rd-line);
+}
+
+.rd-nav .navbar-brand {
+    padding: 0;
+    margin-right: 1.5rem;
+}
+
+/* multiply hides the off-white background of the logo file. */
+.rd-logo {
+    display: block;
+    height: 56px;
+    width: auto;
+    mix-blend-mode: multiply;
+    filter: brightness(1.06) contrast(1.12);
+}
+
+.rd-nav .nav-link,
+.rd-nav .nav-link.text-dark {
+    position: relative;
+    padding: 1.05rem 0.85rem;
+    color: var(--rd-ink) !important;
+    font-family: var(--rd-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.rd-nav .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0.85rem;
+    right: 0.85rem;
+    bottom: 0.55rem;
+    height: 3px;
+    background: var(--rd-red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+}
+
+.rd-nav .nav-link:hover,
+.rd-nav .nav-link:focus {
+    color: var(--rd-red) !important;
+}
+
+.rd-nav .nav-link:hover::after,
+.rd-nav .nav-link:focus::after,
+.rd-nav .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+.rd-nav .nav-link.active {
+    color: var(--rd-red) !important;
+}
+
+/* Buttons that come from the _AuthNav partial (log in, register, log out). */
+.rd-nav .btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.95rem;
+}
+
+.rd-nav .btn-outline-secondary,
+.rd-nav .btn-outline-dark {
+    --bs-btn-color: var(--rd-ink);
+    --bs-btn-border-color: #c9ced6;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--rd-black);
+    --bs-btn-hover-border-color: var(--rd-black);
+    --bs-btn-active-bg: var(--rd-black);
+    --bs-btn-active-border-color: var(--rd-black);
+}
+
+.rd-checker {
+    height: 10px;
+    background: repeating-conic-gradient(#111418 0% 25%, #ffffff 0% 50%) 0 0 / 10px 10px;
+}
+
+
+/* ============================================================
+   SECTION 4: BUTTONS
+   ============================================================ */
+
+.btn {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 0.4rem;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.6rem;
+    font-size: 1.05rem;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--rd-red);
+    --bs-btn-border-color: var(--rd-red);
+    --bs-btn-hover-bg: var(--rd-red-dark);
+    --bs-btn-hover-border-color: var(--rd-red-dark);
+    --bs-btn-active-bg: var(--rd-red-dark);
+    --bs-btn-active-border-color: var(--rd-red-dark);
+    --bs-btn-disabled-bg: var(--rd-red);
+    --bs-btn-disabled-border-color: var(--rd-red);
+    --bs-btn-focus-shadow-rgb: 215, 25, 32;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--rd-red);
+    --bs-btn-border-color: var(--rd-red);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--rd-red);
+    --bs-btn-hover-border-color: var(--rd-red);
+    --bs-btn-active-bg: var(--rd-red-dark);
+    --bs-btn-active-border-color: var(--rd-red-dark);
+    --bs-btn-focus-shadow-rgb: 215, 25, 32;
+}
+
+.btn-secondary {
+    --bs-btn-bg: var(--rd-black);
+    --bs-btn-border-color: var(--rd-black);
+    --bs-btn-hover-bg: #2a3038;
+    --bs-btn-hover-border-color: #2a3038;
+    --bs-btn-active-bg: #2a3038;
+    --bs-btn-active-border-color: #2a3038;
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--rd-ink);
+    --bs-btn-border-color: #b9bec6;
+    --bs-btn-hover-bg: var(--rd-black);
+    --bs-btn-hover-border-color: var(--rd-black);
+    --bs-btn-hover-color: #fff;
+}
+
+.btn-success {
+    --bs-btn-bg: var(--rd-cycle);
+    --bs-btn-border-color: var(--rd-cycle);
+    --bs-btn-hover-bg: #2f6b1a;
+    --bs-btn-hover-border-color: #2f6b1a;
+}
+
+/* Light buttons that sit on top of photographs. */
+.btn-light-outline {
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background: transparent;
+}
+
+.btn-light-outline:hover {
+    color: var(--rd-black);
+    background: #fff;
+    border-color: #fff;
+}
+
+
+/* ============================================================
+   SECTION 5: CARDS, TABLES, ALERTS, FORMS AND PILLS
+   ============================================================ */
+
+.card {
+    border: 1px solid var(--rd-line);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+    overflow: hidden;
+}
+
+.rd-panel {
+    background: var(--rd-card);
+    border: 1px solid var(--rd-line);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+    padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .rd-panel {
+        padding: 2rem;
+    }
+}
+
+.table-responsive {
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+}
+
+.table {
+    --bs-table-bg: #fff;
+    --bs-table-hover-bg: #faf6f0;
+    margin-bottom: 0;
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.85rem 1rem;
+}
+
+.table thead th {
+    background: var(--rd-black);
+    color: #fff;
+    border: 0;
+    font-family: var(--rd-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+.alert {
+    border: 0;
+    border-left: 5px solid;
+    border-radius: 0.4rem;
+}
+
+.alert-success { border-color: var(--rd-cycle); }
+.alert-danger { border-color: var(--rd-red); }
+.alert-warning { border-color: #e0a100; }
+.alert-info { border-color: var(--rd-run); background: #e8f0f8; color: #17365d; }
+.alert-secondary { border-color: #8a929c; }
+
+.form-label {
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rd-muted);
+}
+
+.form-control,
+.form-select {
+    padding: 0.65rem 0.85rem;
+    border-color: #cfd3da;
+    border-radius: 0.4rem;
+    background-color: #fff;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: var(--rd-red);
+    box-shadow: 0 0 0 0.2rem rgba(215, 25, 32, 0.18);
+}
+
+.form-check-input:checked {
+    background-color: var(--rd-red);
+    border-color: var(--rd-red);
+}
+
+.form-text {
+    color: var(--rd-muted);
+}
+
+.text-danger.field-validation-error,
+span.text-danger {
+    font-size: 0.85rem;
+}
+
+/* Tabs (Bootstrap nav-pills): My enrolments / My results, status filters. */
+.nav-pills {
+    gap: 0.4rem;
+}
+
+.nav-pills .nav-link {
+    padding: 0.5rem 1.1rem;
+    border-radius: 2rem;
+    color: var(--rd-ink);
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    font-weight: 600;
+}
+
+.nav-pills .nav-link:hover {
+    border-color: var(--rd-red);
+    color: var(--rd-red);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    color: #fff;
+    background: var(--rd-red);
+    border-color: var(--rd-red);
+}
+
+/* Older views that still use text-bg-info get the brand blue. */
+.badge {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.badge.text-bg-info {
+    background-color: var(--rd-run) !important;
+    color: #fff !important;
+}
+
+.badge.text-bg-primary {
+    background-color: var(--rd-walk) !important;
+}
+
+
+/* ============================================================
+   SECTION 6: PAGE BANNER AND BREADCRUMBS
+   The layout builds this from ViewData (see _Layout.cshtml).
+   ============================================================ */
+
+.rd-banner {
+    position: relative;
+    isolation: isolate;
+    padding: 3.25rem 0 3rem;
+    color: #fff;
+    background: var(--rd-black) var(--rd-banner-img, var(--img-run-2)) center / cover no-repeat;
+}
+
+.rd-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(17, 20, 24, 0.9) 0%, rgba(17, 20, 24, 0.62) 55%, rgba(17, 20, 24, 0.35) 100%);
+}
+
+.rd-banner--run { --rd-banner-img: var(--img-run-2); }
+.rd-banner--cycle { --rd-banner-img: var(--img-cycle-2); }
+.rd-banner--walk { --rd-banner-img: var(--img-walk-2); }
+.rd-banner--finish { --rd-banner-img: var(--img-finish); }
+
+.rd-banner__title {
+    margin: 0;
+    font-size: clamp(2.3rem, 5vw, 3.6rem);
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.rd-banner__sub {
+    margin: 0.6rem 0 0;
+    max-width: 44rem;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.rd-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.rd-crumbs li + li::before {
+    content: "/";
+    margin-right: 0.45rem;
+    opacity: 0.5;
+}
+
+.rd-crumbs a {
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+}
+
+.rd-crumbs a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.rd-crumbs [aria-current="page"] {
+    color: #fff;
+}
+
+
+/* ============================================================
+   SECTION 7: HOME PAGE CAROUSEL
+   ============================================================ */
+
+.rd-hero .carousel-item {
+    background-color: var(--rd-black);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.rd-slide--run { background-image: var(--img-run); }
+.rd-slide--cycle { background-image: var(--img-cycle); }
+.rd-slide--walk { background-image: var(--img-walk); }
+
+.rd-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, rgba(17, 20, 24, 0.92) 0%, rgba(17, 20, 24, 0.66) 48%, rgba(17, 20, 24, 0.15) 100%);
+}
+
+.rd-slide__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: clamp(460px, 74vh, 640px);
+    padding: 3rem 0 4rem;
+    color: #fff;
+}
+
+.rd-slide__content {
+    max-width: 38rem;
+}
+
+.rd-kicker {
+    display: inline-block;
+    margin: 0 0 0.9rem;
+    padding: 0.2rem 0.7rem;
+    color: #fff;
+    font-family: var(--rd-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--rd-red);
+}
+
+.rd-slide--run .rd-kicker { background: var(--rd-run); }
+.rd-slide--walk .rd-kicker { background: var(--rd-walk); }
+.rd-slide--cycle .rd-kicker { background: var(--rd-cycle); }
+
+.rd-slide__title {
+    margin: 0 0 1rem;
+    font-size: clamp(2.6rem, 6.5vw, 4.6rem);
+    font-weight: 800;
+    font-style: italic;
+    line-height: 0.98;
+    text-transform: uppercase;
+}
+
+.rd-slide__lead {
+    margin: 0 0 1.75rem;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.rd-hero .carousel-indicators [data-bs-target] {
+    width: 2.4rem;
+    height: 4px;
+    border: 0;
+    background-color: #fff;
+}
+
+.rd-hero .carousel-control-prev,
+.rd-hero .carousel-control-next {
+    width: 5rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 767.98px) {
+    .rd-hero .carousel-control-prev,
+    .rd-hero .carousel-control-next {
+        display: none;
+    }
+}
+
+
+/* ============================================================
+   SECTION 8: SECTION TITLES, SPLIT SECTIONS AND CALLS TO ACTION
+   ============================================================ */
+
+.rd-section {
+    margin-bottom: 3.5rem;
+}
+
+.rd-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.rd-eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--rd-red);
+    font-family: var(--rd-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.rd-section-title {
+    margin: 0;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+/* Image left, content right. Add .rd-split--flip to swap sides. */
+.rd-split {
+    display: grid;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+}
+
+@media (min-width: 992px) {
+    .rd-split {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rd-split--flip .rd-split__media {
+        order: 2;
+    }
+}
+
+.rd-split__media {
+    min-height: 280px;
+    background: var(--rd-black) center / cover no-repeat;
+}
+
+.rd-split__media--finish { background-image: var(--img-finish); }
+.rd-split__media--cycle { background-image: var(--img-cycle); }
+.rd-split__media--walk { background-image: var(--img-walk); }
+
+.rd-split__body {
+    padding: 2rem;
+}
+
+@media (min-width: 992px) {
+    .rd-split__body {
+        padding: 3rem;
+    }
+}
+
+.rd-steps {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+}
+
+.rd-steps li {
+    position: relative;
+    margin-bottom: 1.1rem;
+    padding-left: 3.4rem;
+    counter-increment: step;
+}
+
+.rd-steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: -0.2rem;
+    width: 2.5rem;
+    color: var(--rd-red);
+    font-family: var(--rd-display);
+    font-size: 2.3rem;
+    font-weight: 800;
+    font-style: italic;
+    line-height: 1;
+}
+
+.rd-steps strong {
+    display: block;
+    font-family: var(--rd-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+}
+
+/* Dark call-to-action band. */
+.rd-cta {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 2.75rem 2rem;
+    color: #fff;
+    border-radius: var(--rd-radius);
+    background: var(--rd-black) var(--img-cycle-2) center / cover no-repeat;
+}
+
+.rd-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(17, 20, 24, 0.94) 0%, rgba(17, 20, 24, 0.7) 60%, rgba(168, 17, 26, 0.55) 100%);
+}
+
+.rd-cta h2 {
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+}
+
+.rd-cta p {
+    max-width: 36rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+
+/* ============================================================
+   SECTION 9: EVENT CARDS, TYPE TAGS AND DATE BIBS
+   ============================================================ */
+
+.rd-event {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.rd-event:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--rd-shadow-lift);
+}
+
+.rd-event__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+}
+
+.rd-event__img {
+    display: block;
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.rd-event:hover .rd-event__img {
+    transform: scale(1.04);
+}
+
+/* No banner uploaded: show a photo that matches the event type. */
+.rd-event__img--ph {
+    background: var(--rd-walk) var(--img-run-2) center / cover no-repeat;
+}
+
+.rd-event__img--ph[data-type="Walk"] { background-image: var(--img-walk-2); }
+.rd-event__img--ph[data-type="Cycle"] { background-image: var(--img-cycle-2); }
+
+.rd-type {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    color: #fff;
+    font-family: var(--rd-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--rd-run);
+}
+
+.rd-type[data-type="Walk"] { background: var(--rd-walk); }
+.rd-type[data-type="Cycle"] { background: var(--rd-cycle); }
+
+.rd-event__media .rd-type {
+    position: absolute;
+    left: 0;
+    top: 1rem;
+}
+
+.rd-event__body {
+    display: flex;
+    flex: 1;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem 0.5rem;
+}
+
+.rd-date {
+    flex: none;
+    width: 3.6rem;
+    padding: 0.35rem 0;
+    text-align: center;
+    border: 2px solid var(--rd-black);
+    border-radius: 0.3rem;
+    line-height: 1;
+    align-self: flex-start;
+}
+
+.rd-date__day {
+    display: block;
+    font-family: var(--rd-display);
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.rd-date__mon {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--rd-red);
+    font-family: var(--rd-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.rd-event__title {
+    margin: 0 0 0.3rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.rd-event__title a {
+    color: var(--rd-ink);
+    text-decoration: none;
+}
+
+.rd-event__title a:hover {
+    color: var(--rd-red);
+}
+
+.rd-event__meta {
+    margin: 0;
+    color: var(--rd-muted);
+    font-size: 0.92rem;
+}
+
+.rd-event__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding: 0.85rem 1.25rem 1.1rem;
+}
+
+.rd-event__km {
+    font-family: var(--rd-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.rd-event__km small {
+    color: var(--rd-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+
+/* ============================================================
+   SECTION 10: FILTER BAR, TOOLBARS AND STAT TILES
+   ============================================================ */
+
+.rd-filter {
+    padding: 1.25rem 1.5rem;
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    border-top: 4px solid var(--rd-red);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+}
+
+.rd-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.rd-toolbar h2 {
+    margin: 0;
+}
+
+.rd-stat {
+    height: 100%;
+    padding: 1.1rem 1.25rem;
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    border-left: 5px solid var(--rd-red);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow);
+}
+
+.rd-stat--run { border-left-color: var(--rd-run); }
+.rd-stat--walk { border-left-color: var(--rd-walk); }
+.rd-stat--cycle { border-left-color: var(--rd-cycle); }
+
+.rd-stat__label {
+    color: var(--rd-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.rd-stat__value {
+    font-family: var(--rd-display);
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1.05;
+}
+
+.rd-next {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.9rem 1.25rem;
+    color: #fff;
+    background: var(--rd-black);
+    border-radius: var(--rd-radius);
+}
+
+.rd-next .rd-eyebrow {
+    margin: 0;
+}
+
+
+/* ============================================================
+   SECTION 11: EVENT DETAILS PAGE (FACTS, CATEGORY CHOICES)
+   ============================================================ */
+
+.rd-facts {
+    margin: 0;
+}
+
+.rd-facts dt {
+    margin-top: 1rem;
+    color: var(--rd-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.rd-facts dt:first-child {
+    margin-top: 0;
+}
+
+.rd-facts dd {
+    margin: 0.1rem 0 0;
+    font-family: var(--rd-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+@media (min-width: 992px) {
+    .rd-sticky {
+        position: sticky;
+        top: 6rem;
+    }
+}
+
+.rd-choice {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 0.6rem;
+    padding: 0.9rem 1rem;
+    background: #fff;
+    border: 2px solid var(--rd-line);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.rd-choice:hover {
+    border-color: #b9bec6;
+}
+
+.rd-choice:has(input:checked) {
+    border-color: var(--rd-red);
+    background: #fff5f5;
+}
+
+.rd-choice__name {
+    display: block;
+    font-family: var(--rd-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.rd-choice__rule {
+    color: var(--rd-muted);
+    font-size: 0.9rem;
+}
+
+.rd-choice--static {
+    cursor: default;
+}
+
+
+/* ============================================================
+   SECTION 12: SIGN IN AND REGISTER (IMAGE LEFT, FORM RIGHT)
+   ============================================================ */
+
+.rd-auth {
+    display: grid;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--rd-line);
+    border-radius: var(--rd-radius);
+    box-shadow: var(--rd-shadow-lift);
+}
+
+@media (min-width: 992px) {
+    .rd-auth {
+        grid-template-columns: 5fr 7fr;
+    }
+}
+
+.rd-auth__media {
+    position: relative;
+    isolation: isolate;
+    display: none;
+    padding: 2.5rem;
+    color: #fff;
+    background: var(--rd-black) var(--img-run) 40% center / cover no-repeat;
+}
+
+.rd-auth__media--cycle { background-image: var(--img-cycle); }
+
+@media (min-width: 992px) {
+    .rd-auth__media {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+}
+
+.rd-auth__media::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(17, 20, 24, 0.15) 0%, rgba(17, 20, 24, 0.9) 100%);
+}
+
+.rd-auth__media h2 {
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+}
+
+.rd-auth__media p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.rd-auth__form {
+    padding: 2rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .rd-auth__form {
+        padding: 3rem;
+    }
+}
+
+
+/* ============================================================
+   SECTION 13: PROFILE
+   ============================================================ */
+
+.rd-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 112px;
+    height: 112px;
+    margin-bottom: 1rem;
+    color: #fff;
+    font-family: var(--rd-display);
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: var(--rd-red);
+    border: 4px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--rd-red);
+    object-fit: cover;
+}
+
+
+/* ============================================================
+   SECTION 14: FOOTER
+   ============================================================ */
+
+.rd-footer {
+    margin-top: auto;
+    color: rgba(255, 255, 255, 0.72);
+    background: var(--rd-black);
+    font-size: 0.95rem;
+}
+
+.rd-footer__main {
+    padding: 2.75rem 0 2rem;
+}
+
+.rd-footer h2 {
+    margin-bottom: 0.9rem;
+    color: #fff;
+    font-size: 1.05rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.rd-footer ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rd-footer li {
+    margin-bottom: 0.4rem;
+}
+
+.rd-footer a {
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+}
+
+.rd-footer a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.rd-footer__brand {
+    max-width: 22rem;
+}
+
+.rd-footer__brand strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #fff;
+    font-family: var(--rd-display);
+    font-size: 1.8rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.rd-footer__base {
+    padding: 0.9rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.85rem;
+}
+
+
+/* ============================================================
+   SECTION 15: MOTION PREFERENCES
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+        scroll-behavior: auto !important;
+    }
+}

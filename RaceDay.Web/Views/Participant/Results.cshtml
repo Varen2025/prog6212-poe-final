@@ -1,0 +1,81 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to list a Participant's
+   published race results with their position out of the finishers.
+*@
+
+@using RaceDay.Web.Services
+
+@model System.Collections.Generic.List<RaceDay.Web.Dtos.ResultResponseDto>
+
+@{
+    ViewData["Title"] = "My results";
+    ViewData["BannerTitle"] = "My results";
+    ViewData["BannerSub"] = "Finish times and positions published by organisers.";
+    ViewData["BannerImage"] = "finish";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("My races", Url.Action("Index", "Participant")),
+        ("My results", null)
+    };
+}
+
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Participant" asp-action="Index">My enrolments</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" asp-controller="Participant" asp-action="Results">My results</a>
+    </li>
+</ul>
+
+@if (ViewData["LoadError"] != null)
+{
+    <div class="alert alert-danger">@ViewData["LoadError"]</div>
+}
+else if (Model.Count == 0)
+{
+    <div class="alert alert-info">
+        You have no published results yet. Results appear here once the
+        organiser publishes them after the event.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Position</th>
+                    <th>Finish time</th>
+                    <th>Published</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RaceDay.Web.Dtos.ResultResponseDto result in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">
+                            <a asp-controller="Events" asp-action="Details" asp-route-id="@result.EventId">@result.EventName</a>
+                        </td>
+                        <td>@result.EventDate.ToString("dd MMM yyyy")</td>
+                        <td>@result.CategoryName</td>
+                        <td class="fw-semibold">@PositionFormatter.Describe(result.FinishingPosition, result.TotalFinishers)</td>
+                        <td>@result.FinishTime.ToString("HH:mm:ss")</td>
+                        <td>@(result.PublishedAt?.ToString("dd MMM yyyy") ?? "-")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

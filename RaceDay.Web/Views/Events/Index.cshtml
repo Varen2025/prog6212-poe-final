@@ -1,0 +1,89 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to filter and list
+   upcoming events as cards with their banner images.
+*@
+
+@model RaceDay.Web.Models.EventBrowseViewModel
+
+@{
+    ViewData["Title"] = "Browse events";
+    ViewData["BannerTitle"] = "Upcoming events";
+    ViewData["BannerSub"] = "Runs, walks and rides near you. Filter by type, place or date.";
+    ViewData["BannerImage"] = "run";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Events", null)
+    };
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (ViewData["LoadError"] != null)
+{
+    <div class="alert alert-danger">@ViewData["LoadError"]</div>
+}
+
+<form method="get" asp-controller="Events" asp-action="Index" class="rd-filter row g-3 align-items-end mb-4">
+    <div class="col-md-3">
+        <label for="eventType" class="form-label">Type</label>
+        <select id="eventType" name="eventType" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(Model.EventType))">All types</option>
+            <option value="Run" selected="@(Model.EventType == "Run")">Run</option>
+            <option value="Walk" selected="@(Model.EventType == "Walk")">Walk</option>
+            <option value="Cycle" selected="@(Model.EventType == "Cycle")">Cycle</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label for="location" class="form-label">Location</label>
+        <input id="location" name="location" value="@Model.Location" class="form-control" placeholder="e.g. Durban" />
+    </div>
+    <div class="col-md-3">
+        <label for="date" class="form-label">Date</label>
+        <input id="date" name="date" type="date" value="@Model.Date" class="form-control" />
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        @if (Model.HasFilters)
+        {
+            <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        }
+    </div>
+</form>
+
+@if (Model.Events.Count == 0)
+{
+    <div class="alert alert-info">
+        @if (Model.HasFilters)
+        {
+            <text>No upcoming events match those filters.</text>
+        }
+        else
+        {
+            <text>There are no upcoming events right now. Please check back soon.</text>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted mb-3">Showing @Model.Events.Count upcoming @(Model.Events.Count == 1 ? "event" : "events")</p>
+
+    <div class="row g-4">
+        @foreach (RaceDay.Web.Dtos.EventResponseDto item in Model.Events)
+        {
+            <div class="col-md-6 col-lg-4">
+                <partial name="_EventCard" model="item" />
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,63 @@
+@*
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 19 November 2026
+
+   Usage: Referenced for the create event form and its validation.
+
+
+   TITLE: Upload files in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the multipart form and file input used to
+   choose an event banner image.
+*@
+
+@model RaceDay.Web.Models.EventFormViewModel
+
+@{
+    ViewData["Title"] = "Create event";
+    ViewData["BannerTitle"] = "Create event";
+    ViewData["BannerSub"] = "Tell participants what, when and where.";
+    ViewData["BannerImage"] = "cycle";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        ("Create event", null)
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="rd-panel">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <form asp-controller="OrganiserEvents" asp-action="Create" method="post" enctype="multipart/form-data" novalidate>
+                <partial name="_EventFormFields" model="Model" />
+
+                <div class="mb-4">
+                    <label asp-for="BannerImage" class="form-label"></label>
+                    <input asp-for="BannerImage" type="file" class="form-control"
+                           accept="image/jpeg,image/png,image/webp" />
+                    <span asp-validation-for="BannerImage" class="text-danger"></span>
+                    <div class="form-text">JPG, PNG or WebP, up to 2 MB.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">Create event</button>
+                <a asp-controller="Organiser" asp-action="Index" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

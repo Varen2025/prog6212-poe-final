@@ -1,0 +1,46 @@
+@*
+   TITLE: Partial views in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/partial
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for one event card that is shared by the home
+   page and the Browse events page.
+*@
+
+@model RaceDay.Web.Dtos.EventResponseDto
+
+<article class="rd-event h-100">
+    <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId" class="rd-event__media" aria-label="View details for @Model.Name">
+        @if (!string.IsNullOrWhiteSpace(Model.BannerImageUrl))
+        {
+            <img src="@Model.BannerImageUrl" alt="Banner for @Model.Name" class="rd-event__img" loading="lazy" />
+        }
+        else
+        {
+            <div class="rd-event__img rd-event__img--ph" data-type="@Model.EventType" role="img" aria-label="@Model.EventType event"></div>
+        }
+        <span class="rd-type" data-type="@Model.EventType">@Model.EventType</span>
+    </a>
+
+    <div class="rd-event__body">
+        <div class="rd-date" aria-hidden="true">
+            <span class="rd-date__day">@Model.EventDate.ToString("dd")</span>
+            <span class="rd-date__mon">@Model.EventDate.ToString("MMM")</span>
+        </div>
+        <div>
+            <h3 class="rd-event__title">
+                <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId">@Model.Name</a>
+            </h3>
+            <p class="rd-event__meta">@Model.Location</p>
+            <p class="rd-event__meta">@Model.EventDate.ToString("dddd, HH:mm")</p>
+        </div>
+    </div>
+
+    <div class="rd-event__foot">
+        <span class="rd-event__km">@Model.DistanceKm.ToString("0.##") <small>km</small></span>
+        <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId" class="btn btn-sm btn-outline-primary">View details</a>
+    </div>
+</article>

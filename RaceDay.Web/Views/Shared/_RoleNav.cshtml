@@ -1,0 +1,51 @@
+@*
+   TITLE: Partial views in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/partial
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the partial view that shows navigation links
+   based on the logged-in user's role.
+*@
+
+@using Microsoft.AspNetCore.Http
+@using RaceDay.Web.Services
+
+@{
+    string? role = Context.Session.GetString(SessionKeys.Role);
+
+    // Used only to highlight the link of the page that is open.
+    string controllerName = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string actionName = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    string ActiveClass(bool isActive) => isActive ? "active" : "";
+}
+
+<li class="nav-item">
+    <a class="nav-link text-dark @ActiveClass(controllerName == "Events")" asp-controller="Events" asp-action="Index">Events</a>
+</li>
+
+@if (role == "Organiser")
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark @ActiveClass(controllerName.StartsWith("Organiser"))" asp-controller="Organiser" asp-action="Index">Organiser Dashboard</a>
+    </li>
+}
+else if (role == "Participant")
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark @ActiveClass(controllerName == "Participant" && actionName == "Index")" asp-controller="Participant" asp-action="Index">My Races</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark @ActiveClass(controllerName == "Participant" && actionName == "Results")" asp-controller="Participant" asp-action="Results">My Results</a>
+    </li>
+}
+
+@if (role != null)
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark @ActiveClass(controllerName == "Profile")" asp-controller="Profile" asp-action="Index">My Profile</a>
+    </li>
+}

@@ -1,0 +1,22 @@
+@*
+   TITLE: Partial views in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/partial
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for moving the dashboard row buttons into a
+   partial view so new buttons are added in one place.
+*@
+
+@model RaceDay.Web.Dtos.DashboardEventDto
+
+<div class="d-flex flex-wrap gap-1">
+    <a asp-controller="OrganiserEvents" asp-action="Details" asp-route-id="@Model.EventId" class="btn btn-sm btn-outline-secondary">Details</a>
+    <a asp-controller="OrganiserCategories" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-sm btn-outline-secondary">Categories</a>
+    <a asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-sm btn-outline-secondary">Enrolments</a>
+    <a asp-controller="OrganiserResults" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-sm btn-outline-secondary">Results</a>
+    <a asp-controller="OrganiserEvents" asp-action="Edit" asp-route-id="@Model.EventId" class="btn btn-sm btn-outline-primary">Edit</a>
+    <a asp-controller="OrganiserEvents" asp-action="Delete" asp-route-id="@Model.EventId" class="btn btn-sm btn-outline-danger">Delete</a>
+</div>

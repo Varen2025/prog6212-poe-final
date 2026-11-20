@@ -1,0 +1,45 @@
+@*
+   TITLE: Tag Helpers in forms in ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the add category form and its validation.
+*@
+
+@model RaceDay.Web.Models.CategoryFormViewModel
+
+@{
+    ViewData["Title"] = "Add category";
+    ViewData["BannerTitle"] = "Add category";
+    ViewData["BannerSub"] = Model.EventName;
+    ViewData["BannerImage"] = "run";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        ("Categories", Url.Action("Index", "OrganiserCategories", new { eventId = Model.EventId })),
+        ("Add category", null)
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="rd-panel">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <form asp-controller="OrganiserCategories" asp-action="Create" asp-route-eventId="@Model.EventId" method="post" novalidate>
+                <partial name="_CategoryFormFields" model="Model" />
+
+                <button type="submit" class="btn btn-primary btn-lg">Add category</button>
+                <a asp-controller="OrganiserCategories" asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

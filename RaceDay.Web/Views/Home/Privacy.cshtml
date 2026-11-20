@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Privacy Policy";
+    ViewData["BannerTitle"] = "Privacy policy";
+    ViewData["BannerImage"] = "walk";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Privacy", null)
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="rd-panel">
+            <p>Use this page to detail your site's privacy policy.</p>
+        </div>
+    </div>
+</div>

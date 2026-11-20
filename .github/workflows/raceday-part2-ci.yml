@@ -1,0 +1,211 @@
+
+# ============================================================
+# RaceDay Event Management System
+# PROG6212 - POE Part 2
+# GitHub Actions Continuous Integration Workflow
+# ============================================================
+
+# Code Attribution
+#
+# TITLE: Building and Testing .NET
+# AUTHOR: GitHub
+# DATE: n.d.
+# AVAILABLE:
+# https://docs.github.com/en/actions/tutorials/build-and-test-code/net
+# DATE ACCESSED: 19 October 2026
+#
+# Usage: Referenced for configuring an automated workflow
+# that restores, builds and tests a .NET application.
+#
+# ============================================================
+
+# Code Attribution
+#
+# TITLE: Setup .NET for GitHub Actions
+# AUTHOR: GitHub Actions
+# DATE: n.d.
+# AVAILABLE:
+# https://github.com/actions/setup-dotnet
+# DATE ACCESSED: 19 October 2026
+#
+# Usage: Referenced for installing the .NET 10 SDK.
+#
+# ============================================================
+
+
+# Name displayed on the GitHub Actions page.
+name: RaceDay Part 2 CI
+
+
+# ============================================================
+# SECTION 1: WORKFLOW TRIGGERS
+# ============================================================
+
+# Run automatically whenever code is pushed.
+# Also run on pull requests and allow manual execution.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+
+# Only read access to the repository is required.
+permissions:
+  contents: read
+
+
+# ============================================================
+# SECTION 2: BUILD AND TEST JOB
+# ============================================================
+
+jobs:
+  build-and-test:
+
+    # Name displayed in GitHub Actions.
+    name: Build and Test RaceDay API
+
+    # Run on a GitHub-hosted Linux computer.
+    runs-on: ubuntu-latest
+
+    # Prevent a failed or hanging build running indefinitely.
+    timeout-minutes: 20
+
+    steps:
+
+      # ======================================================
+      # STEP 1: CHECK OUT THE REPOSITORY
+      # ======================================================
+
+      - name: Checkout RaceDay repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+
+      # ======================================================
+      # STEP 2: INSTALL .NET 10
+      # ======================================================
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+
+      # ======================================================
+      # STEP 3: VERIFY INSTALLED .NET VERSION
+      # ======================================================
+
+      - name: Display .NET version
+        run: dotnet --version
+
+
+      # ======================================================
+      # STEP 4: FIND THE RACEDAY SOLUTION
+      # ======================================================
+
+      # Visual Studio may use either .sln or .slnx.
+      # Find the solution without assuming its directory.
+      - name: Find RaceDay solution
+        id: solution
+        shell: bash
+        run: |
+          solution="$(find . -type f \
+            \( -name 'RaceDay.Api.sln' -o -name 'RaceDay.Api.slnx' \) \
+            -not -path '*/obj/*' \
+            -print -quit)"
+
+          if [ -z "$solution" ]; then
+            echo "ERROR: RaceDay.Api solution was not found."
+            exit 1
+          fi
+
+          echo "Found solution: $solution"
+          echo "path=$solution" >> "$GITHUB_OUTPUT"
+
+
+      # ======================================================
+      # STEP 5: VALIDATE REPOSITORY STRUCTURE
+      # ======================================================
+
+      # Ensure the README exists and the MSTest project
+      # is included in the RaceDay solution.
+      - name: Validate repository structure
+        shell: bash
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: |
+          if [ ! -f README.md ]; then
+            echo "ERROR: Root README.md is missing."
+            exit 1
+          fi
+
+          if ! dotnet sln "$SOLUTION_PATH" list \
+            | grep -Fq "RaceDay.Api.Tests"; then
+            echo "ERROR: RaceDay.Api.Tests is not in the solution."
+            exit 1
+          fi
+
+          echo "Repository structure validation passed."
+
+
+      # ======================================================
+      # STEP 6: RESTORE NUGET PACKAGES
+      # ======================================================
+
+      - name: Restore NuGet packages
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: dotnet restore "$SOLUTION_PATH"
+
+
+      # ======================================================
+      # STEP 7: BUILD RACEDAY APPLICATION
+      # ======================================================
+
+      # Compile the application and all test projects.
+      - name: Build RaceDay solution
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: |
+          dotnet build "$SOLUTION_PATH" \
+            --configuration Release \
+            --no-restore
+
+
+      # ======================================================
+      # STEP 8: RUN AUTOMATED MSTEST TESTS
+      # ======================================================
+
+      # Run the tests already included in the solution.
+      # Save the output as a TRX test results file.
+      - name: Run MSTest suite
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: |
+          dotnet test "$SOLUTION_PATH" \
+            --configuration Release \
+            --no-build \
+            --no-restore \
+            --logger "trx;LogFileName=raceday-tests.trx" \
+            --results-directory "./TestResults" \
+            --verbosity normal
+
+
+      # ======================================================
+      # STEP 9: SAVE TEST RESULTS
+      # ======================================================
+
+      # Upload results even if one of the tests fails.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaceDay-MSTest-Results
+          path: TestResults/*.trx
+          if-no-files-found: ignore
+
+
+# ============================================================
+# END OF RACEDAY PART 2 CI WORKFLOW
+# ============================================================

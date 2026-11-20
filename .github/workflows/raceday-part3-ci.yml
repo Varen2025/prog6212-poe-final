@@ -1,0 +1,235 @@
+# ============================================================
+# RaceDay Event Management System
+# PROG6212 - POE Part 3
+# GitHub Actions Continuous Integration Workflow
+# ============================================================
+
+# Code Attribution
+#
+# TITLE: Building and Testing .NET
+# AUTHOR: GitHub
+# DATE: n.d.
+# AVAILABLE:
+# https://docs.github.com/en/actions/tutorials/build-and-test-code/net
+# DATE ACCESSED: 20 November 2026
+#
+# Usage: Referenced for configuring a workflow that restores,
+# builds and tests the API and the MVC web application.
+#
+# ============================================================
+
+# Code Attribution
+#
+# TITLE: docker compose build
+# AUTHOR: Docker Inc.
+# DATE: n.d.
+# AVAILABLE:
+# https://docs.docker.com/reference/cli/docker/compose/build/
+# DATE ACCESSED: 20 November 2026
+#
+# Usage: Referenced for building the API and MVC Docker images
+# from docker-compose.yml inside the workflow.
+#
+# ============================================================
+
+
+# Name displayed on the GitHub Actions page.
+name: RaceDay Part 3 CI
+
+
+# ============================================================
+# SECTION 1: WORKFLOW TRIGGERS
+# ============================================================
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+
+# ============================================================
+# SECTION 2: BUILD, TEST AND DOCKER JOB
+# ============================================================
+
+jobs:
+  build-test-docker:
+
+    name: Build API, MVC and Docker images
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    steps:
+
+      # ======================================================
+      # STEP 1: CHECK OUT THE REPOSITORY
+      # ======================================================
+
+      - name: Checkout RaceDay repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+
+      # ======================================================
+      # STEP 2: INSTALL .NET 10
+      # ======================================================
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Display .NET version
+        run: dotnet --version
+
+
+      # ======================================================
+      # STEP 3: FIND THE RACEDAY SOLUTION
+      # ======================================================
+
+      - name: Find RaceDay solution
+        id: solution
+        shell: bash
+        run: |
+          solution="$(find . -type f \
+            \( -name 'RaceDay.Api.sln' -o -name 'RaceDay.Api.slnx' \) \
+            -not -path '*/obj/*' \
+            -print -quit)"
+
+          if [ -z "$solution" ]; then
+            echo "ERROR: RaceDay.Api solution was not found."
+            exit 1
+          fi
+
+          echo "Found solution: $solution"
+          echo "path=$solution" >> "$GITHUB_OUTPUT"
+
+
+      # ======================================================
+      # STEP 4: VALIDATE REPOSITORY STRUCTURE
+      # ======================================================
+
+      # Checks the files Part 3 needs, and makes sure no secret
+      # file or Azure key was committed by mistake.
+      - name: Validate repository structure
+        shell: bash
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: |
+          for required in README.md docker-compose.yml .env.example \
+            RaceDay.Api/Dockerfile RaceDay.Web/Dockerfile; do
+            if [ ! -f "$required" ]; then
+              echo "ERROR: $required is missing."
+              exit 1
+            fi
+          done
+
+          solution_list="$(dotnet sln "$SOLUTION_PATH" list)"
+
+          if ! echo "$solution_list" | grep -Fq "RaceDay.Web"; then
+            echo "ERROR: RaceDay.Web is not in the solution."
+            exit 1
+          fi
+
+          if ! echo "$solution_list" | grep -Fq "RaceDay.Api.Tests"; then
+            echo "ERROR: RaceDay.Api.Tests is not in the solution."
+            exit 1
+          fi
+
+          if git ls-files | grep -qx '.env'; then
+            echo "ERROR: the secret .env file is tracked by Git."
+            exit 1
+          fi
+
+          if git grep -n "AccountKey=" -- . ':!*.md' ':!.github'; then
+            echo "ERROR: an Azure storage key was found in a tracked file."
+            exit 1
+          fi
+
+          echo "Repository structure validation passed."
+
+
+      # ======================================================
+      # STEP 5: RESTORE NUGET PACKAGES
+      # ======================================================
+
+      - name: Restore NuGet packages
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: dotnet restore "$SOLUTION_PATH"
+
+
+      # ======================================================
+      # STEP 6: BUILD THE SOLUTION (API, MVC AND TESTS)
+      # ======================================================
+
+      - name: Build RaceDay solution
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: |
+          dotnet build "$SOLUTION_PATH" \
+            --configuration Release \
+            --no-restore
+
+
+      # ======================================================
+      # STEP 7: BUILD THE MVC WEB APPLICATION
+      # ======================================================
+
+      - name: Build RaceDay MVC web application
+        run: |
+          dotnet build RaceDay.Web/RaceDay.Web.csproj \
+            --configuration Release \
+            --no-restore
+
+
+      # ======================================================
+      # STEP 8: RUN AUTOMATED MSTEST TESTS
+      # ======================================================
+
+      - name: Run MSTest suite
+        env:
+          SOLUTION_PATH: ${{ steps.solution.outputs.path }}
+        run: |
+          dotnet test "$SOLUTION_PATH" \
+            --configuration Release \
+            --no-build \
+            --no-restore \
+            --logger "trx;LogFileName=raceday-tests.trx" \
+            --results-directory "./TestResults" \
+            --verbosity normal
+
+
+      # ======================================================
+      # STEP 9: SAVE TEST RESULTS
+      # ======================================================
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaceDay-Part3-MSTest-Results
+          path: TestResults/*.trx
+          if-no-files-found: ignore
+
+
+      # ======================================================
+      # STEP 10: BUILD THE DOCKER IMAGES
+      # ======================================================
+
+      # Uses the safe .env.example values. Nothing is pushed.
+      - name: Validate docker-compose.yml
+        run: docker compose --env-file .env.example config --quiet
+
+      - name: Build API and MVC Docker images
+        run: docker compose --env-file .env.example build
+
+
+# ============================================================
+# END OF RACEDAY PART 3 CI WORKFLOW
+# ============================================================

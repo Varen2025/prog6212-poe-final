@@ -1,0 +1,34 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 19 November 2026
+
+   Usage: Referenced for the Razor view shown when a user opens a
+   page that belongs to a different role.
+*@
+
+@{
+    ViewData["Title"] = "Access denied";
+    ViewData["BannerTitle"] = "Access denied";
+    ViewData["BannerSub"] = "That page belongs to a different kind of account.";
+    ViewData["BannerImage"] = "cycle";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Access denied", null)
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="rd-panel text-center">
+            <p class="text-muted">
+                You do not have permission to open that page with your account.
+            </p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">Back to home</a>
+        </div>
+    </div>
+</div>

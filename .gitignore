@@ -1,0 +1,38 @@
+
+# ============================================================
+# RaceDay Event Management System
+# PROG6212 - POE Part 2
+# Git Ignore Configuration
+# ============================================================
+
+# Visual Studio temporary files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vsidx
+
+# Compiled application files
+[Bb]in/
+[Oo]bj/
+
+# Test results
+TestResults/
+
+# Temporary files
+*.tmp
+*.log
+
+# Local development secrets
+secrets.json
+.env
+.env.*
+
+# ============================================================
+# End of Git Ignore Configuration
+# ============================================================
+
+.env
+
+!.env.example

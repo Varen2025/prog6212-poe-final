@@ -1,0 +1,44 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 19 November 2026
+
+   Usage: Referenced for the confirmation page shown before an event
+   is deleted.
+*@
+
+@model RaceDay.Web.Dtos.EventResponseDto
+
+@{
+    ViewData["Title"] = "Delete event";
+    ViewData["BannerTitle"] = "Delete event";
+    ViewData["BannerSub"] = Model.Name;
+    ViewData["BannerImage"] = "run";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        ("Delete event", null)
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="rd-panel">
+            <div class="alert alert-warning">
+                Are you sure you want to delete <strong>@Model.Name</strong>
+                (@Model.EventDate.ToString("dd MMM yyyy, HH:mm"))?
+                This cannot be undone. An event that already has categories
+                or enrolments cannot be deleted.
+            </div>
+
+            <form asp-controller="OrganiserEvents" asp-action="Delete" asp-route-id="@Model.EventId" method="post">
+                <button type="submit" class="btn btn-danger">Delete event</button>
+                <a asp-controller="Organiser" asp-action="Index" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

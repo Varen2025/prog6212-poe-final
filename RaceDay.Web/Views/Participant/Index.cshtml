@@ -1,0 +1,80 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to list a Participant's
+   upcoming and past enrolments.
+*@
+
+@model RaceDay.Web.Models.MyRacesViewModel
+
+@{
+    ViewData["Title"] = "My races";
+    ViewData["BannerTitle"] = "My races";
+    ViewData["BannerSub"] = "Your enrolments, upcoming starts and race history.";
+    ViewData["BannerImage"] = "run";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("My races", null)
+    };
+}
+
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item">
+        <a class="nav-link active" asp-controller="Participant" asp-action="Index">My enrolments</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Participant" asp-action="Results">My results</a>
+    </li>
+</ul>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (ViewData["LoadError"] != null)
+{
+    <div class="alert alert-danger">@ViewData["LoadError"]</div>
+}
+else if (Model.Upcoming.Count == 0 && Model.Past.Count == 0)
+{
+    <div class="alert alert-info">
+        You haven't enrolled in any events yet.
+        <a asp-controller="Events" asp-action="Index">Browse upcoming events</a> to get started.
+    </div>
+}
+else
+{
+    <h2 class="h3 mb-3">Upcoming</h2>
+
+    @if (Model.Upcoming.Count == 0)
+    {
+        <p class="text-muted">No upcoming enrolments. <a asp-controller="Events" asp-action="Index">Browse events</a>.</p>
+    }
+    else
+    {
+        <partial name="_EnrolmentTable" model="Model.Upcoming" />
+    }
+
+    <h2 class="h3 mt-5 mb-3">Past</h2>
+
+    @if (Model.Past.Count == 0)
+    {
+        <p class="text-muted">No past events yet.</p>
+    }
+    else
+    {
+        <partial name="_EnrolmentTable" model="Model.Past" />
+    }
+}

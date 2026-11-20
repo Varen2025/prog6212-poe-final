@@ -1,0 +1,133 @@
+@*
+   TITLE: Razor syntax reference for ASP.NET Core
+   AUTHOR: Microsoft
+   DATE: n.d.
+   AVAILABLE:
+   https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+   DATE ACCESSED: 20 November 2026
+
+   Usage: Referenced for the Razor syntax used to list an event's
+   completed enrolments with their results and the record, edit and
+   publish buttons.
+*@
+
+@model RaceDay.Web.Models.ResultsListViewModel
+
+@{
+    ViewData["Title"] = "Results - " + Model.Event.Name;
+    ViewData["BannerTitle"] = "Results";
+    ViewData["BannerSub"] = Model.Event.Name + " · " + Model.Event.EventDate.ToString("dd MMM yyyy, HH:mm");
+    ViewData["BannerImage"] = "finish";
+    ViewData["Crumbs"] = new List<(string Text, string? Url)>
+    {
+        ("Home", Url.Action("Index", "Home")),
+        ("Dashboard", Url.Action("Index", "Organiser")),
+        (Model.Event.Name, Url.Action("Details", "OrganiserEvents", new { id = Model.Event.EventId })),
+        ("Results", null)
+    };
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-4">
+        <div class="rd-stat rd-stat--walk">
+            <div class="rd-stat__label">Completed enrolments</div>
+            <div class="rd-stat__value">@Model.CompletedCount</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-4">
+        <div class="rd-stat rd-stat--run">
+            <div class="rd-stat__label">Results recorded</div>
+            <div class="rd-stat__value">@Model.RecordedCount</div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="rd-stat rd-stat--cycle">
+            <div class="rd-stat__label">Results published</div>
+            <div class="rd-stat__value">@Model.PublishedCount</div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="alert alert-info">
+        No enrolments are marked Completed yet. Results can be recorded
+        once the event has started and an enrolment is completed on the
+        <a asp-controller="OrganiserEnrolments" asp-action="Index" asp-route-eventId="@Model.Event.EventId">Enrolments page</a>.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Category</th>
+                    <th>Position</th>
+                    <th>Finish time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RaceDay.Web.Models.ResultRowViewModel row in Model.Rows)
+                {
+                    <tr>
+                        <td class="fw-semibold">@row.Enrolment.ParticipantName</td>
+                        <td>@row.Enrolment.CategoryName</td>
+
+                        @if (row.Result == null)
+                        {
+                            <td class="text-muted">-</td>
+                            <td class="text-muted">-</td>
+                            <td><span class="badge text-bg-warning">No result</span></td>
+                            <td>
+                                <a asp-controller="OrganiserResults" asp-action="Record" asp-route-eventId="@Model.Event.EventId" asp-route-enrolmentId="@row.Enrolment.EnrolmentId" class="btn btn-sm btn-primary">Record result</a>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@row.Result.FinishingPosition</td>
+                            <td>@row.Result.FinishTime.ToString("HH:mm:ss")</td>
+                            <td>
+                                @if (row.Result.IsPublished)
+                                {
+                                    <span class="badge text-bg-success">Published</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-secondary">Unpublished</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a asp-controller="OrganiserResults" asp-action="Edit" asp-route-eventId="@Model.Event.EventId" asp-route-id="@row.Result.ResultId" class="btn btn-sm btn-outline-primary">Edit</a>
+
+                                    <form asp-controller="OrganiserResults" asp-action="Publish" asp-route-eventId="@Model.Event.EventId" asp-route-id="@row.Result.ResultId" method="post">
+                                        <input type="hidden" name="publish" value="@(row.Result.IsPublished ? "false" : "true")" />
+                                        <button type="submit" class="btn btn-sm @(row.Result.IsPublished ? "btn-outline-secondary" : "btn-success")">
+                                            @(row.Result.IsPublished ? "Unpublish" : "Publish")
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="Organiser" asp-action="Index" class="btn btn-link mt-3 ps-0">&larr; Back to dashboard</a>
